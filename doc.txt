@@ -1,0 +1,39 @@
+Authors: Chitrangada Juneja and Dylan Coles
+Net IDs: cj21 and colesdylan12
+
+In this project, we are following the MVC procedure, wherein 
+we divide our View, Controller and Model. The user exclusively deals 
+with the main method in the View, which uses the Controller as a facilitor to
+talk to the Model. 
+
+The classes we used :
+- MyLibrary.java			:View
+-BookController.java		: Controller
+-BookModel.java				:Model
+-Book.java
+
+We used the following libraries:
+
+1. Java I/O Libraries: java.io.File, java.io.FileNotFoundException, java.util.Scanner
+2. Java Collections Framework: java.util.ArrayList, java.util.HashMap, java.util.Map.Entry
+		  Interfaces involved: java.util.List, java.util.Map
+
+3.java.util.Collections : for shuffling, sorting
+
+From the above list, you can see we used A HashMap for mapping our Book objects
+to their ratings, along with ArrayLists to keep track of unread and read books. 
+Throughout our library , we have all the books in the HashMap; none are removed.
+therefore, we use the HashMap to access Book objects when checking for their presence
+in our library. 
+To keep in line with our intended Encapsulation, we used Method Overloading 
+(Compile-time Polymorphism) in our Model when sorting books according to the 4 
+categories specified. This enabled us to generalize our code in 2 different ways,
+and also made it easier to encapsulate our data to maximise data protection.
+In most cases throughout the program, the View never has access to Book objects directly;
+if any Book objects need to be created for a search, or any other operation,
+we do it in the Controller. Likewise, we never return a Book object directly to the View.
+This helps us prevent any Escaping References.
+
+
+
+
