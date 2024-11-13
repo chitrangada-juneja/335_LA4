@@ -31,16 +31,25 @@ public class BookModel {
 	// dictionary of unread books
 	// we know status is going to be unread; no need for the key: value since every
 	// value is UNREAD
-	private ArrayList<Book> thisLibraryUnread = new ArrayList<Book>();
+	private ArrayList<Book> thisLibraryUnread;
 	// dictionary of all books (read/unread) and their rating
-	private HashMap<Book, Integer> thisLibraryRating = new HashMap<Book, Integer>();
+	private HashMap<Book, Integer> thisLibraryRating ;
 	// all values will be READ, so no need for a dictionary, we can use a list
-	private ArrayList<Book> thisLibraryRead = new ArrayList<Book>();
-
-	public BookModel(String fileName) {
-		// add books from text list into the library
-		addBooks(fileName);
+	private ArrayList<Book> thisLibraryRead ;
+	public BookModel() {
+		 thisLibraryUnread = new ArrayList<Book>();
+		 thisLibraryRating = new HashMap<Book, Integer>();
+		 thisLibraryRead = new ArrayList<Book>();
+		 
+	
+		
 	}
+	
+	public void addBook(Book book) {
+		thisLibraryUnread.add(book);
+		thisLibraryRating.put(book, 0);
+	}
+
 
 	public void addBooks(String fileName) {
 		/* 
@@ -126,44 +135,46 @@ public class BookModel {
 
 	}
 
-	public void addBook(Book book) {
-		thisLibraryUnread.add(book);
-		thisLibraryRating.put(book, 0);
-	}
-
-	public int setToRead(Book book) {
+	
+	public int setToRead(String title) {
 		// first we check if the book is even in the library
 		// if not, we return control to the controller to display 
-		// the right message. 
+		// the right message.
 		
-		if ( thisLibraryRating.get(book)==null) {
+		ArrayList <Book> result=this.search(0,title.toUpperCase());
+		
+		if (result.isEmpty()) {
 			return 1;
 		}
 		boolean bookInReadList = false;
 		for (int i = 0; i < thisLibraryRead.size(); i++) {
-			if (thisLibraryRead.get(i) == book) {
+			if (thisLibraryRead.get(i) == result.get(0)) {
 				bookInReadList = true;
 			}
 		}
 		// check if the book has been set to "read"
 		if (!bookInReadList) {
 			// if not, add it to "read" list and remove from "unread" list
-			thisLibraryRead.add(book);
-			thisLibraryUnread.remove(book);
+			thisLibraryRead.add(result.get(0));
+			thisLibraryUnread.remove(result.get(0));
 		}
 		return 0;
 	}
 
-	public int rate(Book book, int rating) {
+	public int rate(String title, int rating) {
 		// set rating; can be changed multiple times
 		// it is possible they are trying to rate a book 
 		// that doesn't exist in the library. we return control
 		// to the controller to display the right message in that case.
-		if (thisLibraryRating.replace(book, rating)==null) {
+		
+		ArrayList<Book> searched= search (0, title.toUpperCase());
+		if (searched.isEmpty()) {
 			return 1;
 		}
-		
-		thisLibraryRating.replace(book, rating);
+		else {
+			thisLibraryRating.replace(searched.get(0), rating);
+			
+		}
 		return 0;
 	}
 
@@ -188,7 +199,7 @@ public class BookModel {
 	 * right order.  
 	 */ 
 	
-	public void getBooks ( int searchBy) {
+	public ArrayList<Book> getBooks ( int searchBy) {
 		ArrayList<String> sorted = new ArrayList<String>();
 		for (Entry<Book, Integer> mapElement : thisLibraryRating.entrySet()) {
 			Book key = mapElement.getKey();
@@ -204,30 +215,37 @@ public class BookModel {
 		Collections.sort(sorted);
 		// print out each title in sorted order
 		List<Book> keys= new ArrayList(thisLibraryRating.keySet());
+		ArrayList<Book> sorted_books=new ArrayList<Book>();
+		
 		for (int i=0; i<sorted.size();i++) {
 			for ( int j=0; j<keys.size(); j++) {
 				
 				if (searchBy==0) {
 					if ( (sorted.get(i)).equals(keys.get(j).getTitle()) ) {
-						System.out.println(keys.get(j).toString());
+						sorted_books.add (new Book (keys.get(j).getTitle(), keys.get(j).getAuthor()));
+						
+						//System.out.println(keys.get(j).toString());
 						keys.remove(j);
 						break;
 					}
 				}
 				if ( searchBy==1) {
 					if ( (sorted.get(i)).equals(keys.get(j).getAuthor()) ) {
-						System.out.println(keys.get(j).toString());
+						sorted_books.add (new Book (keys.get(j).getTitle(), keys.get(j).getAuthor()));
+						//System.out.println(keys.get(j).toString());
 						keys.remove(j);
 						break;
 					}
 				}
 			}
 		}
+		return sorted_books;
 	}
 	
-	public int getBooks(int searchBy, String searchMode) {
+	public ArrayList<Book> getBooks(int searchBy, String searchMode) {
 		/* 2nd version of getBooks
 		 */
+		ArrayList<Book> sorted_books=new ArrayList<Book>();
 		ArrayList <Book> ListMode;
 		if (searchBy==2) {
 			ListMode= thisLibraryRead;
@@ -241,21 +259,20 @@ public class BookModel {
 			sorted.add(ListMode.get(i).getTitle());
 		} 
 		Collections.sort(sorted);
-		if (sorted.isEmpty()) {
-			return 1;
-		}
+		
 		List<Book> keys= new ArrayList(thisLibraryRating.keySet());
 		// print out all the read titles
 		for (int i = 0; i < sorted.size(); i++) {
 			for ( int j=0; j<keys.size(); j++) {
 				if ( (sorted.get(i)).equals(keys.get(j).getTitle()) ) {
-					System.out.println(keys.get(j).toString());
+					//System.out.println(keys.get(j).toString());
+					sorted_books.add (new Book (keys.get(j).getTitle(), keys.get(j).getAuthor()));
 					keys.remove(j);
 					break;
 				}
 			}
 		}
-		return 0;
+		return sorted_books;
 	}
 	
 
@@ -263,7 +280,11 @@ public class BookModel {
 		/*
 		 * simply shuffling the unread list and returning the one at index 0
 		 */
-		Collections.shuffle(thisLibraryUnread);
-		return thisLibraryUnread.get(0);
+		if (!thisLibraryUnread.isEmpty()) {
+			Collections.shuffle(thisLibraryUnread);
+			return thisLibraryUnread.get(0);
+			
+		}
+		return null;
 	}
 }

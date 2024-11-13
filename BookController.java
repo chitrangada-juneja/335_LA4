@@ -24,19 +24,16 @@ public class BookController {
 	}
 	
 
-	public void searchLibrary(int searchBy, String search) {
+	public ArrayList<Book> searchLibrary(int searchBy, String search) {
 		 ArrayList <Book> results=MODEL.search(searchBy, search);
-		if (results.isEmpty()) {
-			System.out.println("Sorry, couldn't find any books matching your specifications! ");
-			return;
-		}
-		System.out.println("The following books match your specifications: ");
-		int l=results.size();
-		for ( int i=0; i<l;i++) {
-			System.out.println(results.get(i).toString());
-	
-		}
+		 ArrayList<Book> results_copy= new ArrayList<Book>();
 		 
+		 for ( int i=0; i<results.size(); i++) {
+			 results_copy.add(new Book (results.get(i).getTitle(), results.get(i).getAuthor()));
+			 
+			 
+		 }
+		return results_copy;
 		
 	}
 
@@ -48,63 +45,62 @@ public class BookController {
 		
 	}
 
-	public void readBook(String title, String author) {
+	public int readBook(String title, String author) {
 		// it is possible the book doesnt exist, so we create a flag
 		// to check accordingly.
-		Book  book = new Book(title.toUpperCase(), author.toUpperCase());
-		int n= MODEL.setToRead(book);
 		
-		if (n==1) {
-			System.out.println("Sorry, this book doesn't exist in our library!");
+		int n= MODEL.setToRead(title);
+		return n;
+		
 			
-		}
-		
 	}
+		
+	
 
-	public void rateBook(String title, String author, int rating) {
+	public int rateBook(String title, String author, int rating) {
 		Book book = new Book(title.toUpperCase(), author.toUpperCase());
-		int n= MODEL.rate(book, rating);
+		int n= MODEL.rate(title, rating);
 		// if 1 is returned , it means we couldnt find the book in the library
 		//to rate
-		if (n==1) {
-			System.out.println("Sorry, this book doesn't exist in our library!");
-		}
+		return n;
 	}
 
-	public void getBooksFromLibrary(int searchBy) {
+	public ArrayList<Book> getBooksFromLibrary(int searchBy) {
 		/*
 		 * since we have 2 overloaded versions, we call 
 		 * the ones according to their method signatures as 
 		 * defined by the model.
 		 */
+		ArrayList<Book> sorted_books=new ArrayList<Book>();
 		if (searchBy == 0) {
-			MODEL.getBooks(searchBy);
+			sorted_books=MODEL.getBooks(searchBy);
 		} 
 		else if (searchBy == 1) 
 		{
-			MODEL.getBooks(searchBy);
+			sorted_books=MODEL.getBooks(searchBy);
 		} 
 		else if (searchBy == 2){
 			
-			int check= MODEL.getBooks(searchBy, "read");
+			sorted_books= MODEL.getBooks(searchBy, "read");
 			// the flag check notifies us if the list is empty 
-			if (check==1) {
-				System.out.println("Sorry ! Looks like there are no read books !");
-			}
+			
 			
 		}
 		else {
-			int check= MODEL.getBooks(searchBy,"unread");
-			if (check==1) {
-				System.out.println("Sorry ! Looks like there are no unread books !");
-			}
+			sorted_books= MODEL.getBooks(searchBy,"unread");
+			
 		}
+		
+		return sorted_books;
 	}
 
 	public String[] suggestBook() {
 		Book suggestion = MODEL.suggestRead();
 		// we get the book object, but we deal with it internally instead of 
 		// sending it to the view.
+		if (suggestion==null) {
+			return null;
+		}
 		String[] bookInfo = { suggestion.getTitle(), suggestion.getAuthor() };
 		return bookInfo;
 	}
